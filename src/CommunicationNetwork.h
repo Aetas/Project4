@@ -24,7 +24,6 @@ class CommunicationNetwork
         bool queueIsFull(); //send when full
         void transmitMsg(std::string);
 
-    protected:
     private:
         node *head;
         node *tail;
