@@ -2,35 +2,38 @@
 #define COMMUNICATIONNETWORK_H
 #include<string>
 struct node{
-
-    std::string name;
-    std::string message; //intended to hold one word
-    node *next;
-    node *previous;
+	
+	node();					//std construct - may not be used.
+	node(node* prev, node* nxt);	//will need both previous and next at creation time.
+	node(node* prev);				//works well for single linked list, will have to see about this
+    std::string name;		//name
+    std::string message;	//intended to hold one word
+    node *next;				//pointing the way to mordor
+    node *previous;			//poiting the way to the shire
 
 };
 
 class CommunicationNetwork
 {
     public:
-        CommunicationNetwork(int);
-        virtual ~CommunicationNetwork();
+        CommunicationNetwork(int);		
+        virtual ~CommunicationNetwork();	//virtual destructor..? no derivation anyhow
         //circular queue methods
-        void enqueue(std::string);
-        std::string dequeue(); //should send through network, call transmit msg
-        void printQueue();
-        void buildNetwork();
-        void printPath();
-        bool queueIsFull(); //send when full
-        void transmitMsg(std::string);
+        void enqueue(std::string);			//read until full. 
+        std::string dequeue(); 				//pops queue when full
+        void printQueue();					//reads what is being stored in the q, mostly testing
+        void buildNetwork();				//builds.
+        void printPath();					//prints path
+        bool queueIsFull(); 				//send when full
+        void transmitMsg(std::string);		//deq master call, pushes through network
 
     private:
-        node *head;
-        node *tail;
-        int queueSize;
-        int queueHead;
-        int queueTail;
-        std::string *arrayQueue;
+        node *head;				//yop
+        node *tail;				//bottom
+        unsigned int queueSize;	//
+        unsigned int queueHead;	//
+        unsigned int queueTail;	//
+        std::string *arrayQueue;//
 };
 
 #endif // COMMUNICATIONNETWORK_H
