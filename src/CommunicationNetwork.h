@@ -38,8 +38,7 @@ class CommunicationNetwork
 		void build_net();			//builds the network. hardcoded initial names
 		void print_path();			//prints whole chain with names
         bool queueIsFull();			//send when full
-		template<typename T>
-		void transfer_msg(T);		//pushes a message through the nodes.
+		void transfer_msg(std::string);		//pushes a message through the nodes.
 		template<typename T>
 		beacon* find_city(T k);		//finds a city by name
 		void add_city();			//inserts city
