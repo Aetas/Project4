@@ -68,12 +68,16 @@ void beacon::set_next(beacon *nxt)
 //*************
 //=NETWORK=
 //*************
-CommunicationNetwork::CommunicationNetwork(int qsize)	//
+CommunicationNetwork::CommunicationNetwork(int qsize)
 {
 	crawler = NULL;
 	head = NULL;
 	queueSize = qsize;
-	arrayQueue = new std::string[queueSize];	//might be better implimented in a queue function
+	arrayQueue = new/*("")*/ std::string[queueSize];	//might be better implimented in a queue function
+	for (int i = 0; i < queueSize; i++)	//initialize all to 'null' strings
+	{
+		arrayQueue[i] = "";
+	}
 	queueHead = 0;
 	queueTail = 0;
 	ini = false;
@@ -148,7 +152,15 @@ void CommunicationNetwork::print_path()
 //circular queue methods
 void CommunicationNetwork::enqueue(std::string fileData)
 {
-	arrayQueue[0] = fileData;
+	if (queueIsFull())
+	{
+		std::cout << "Queue is full." << std::endl;
+	}
+	else
+	{
+		arrayQueue[queueHead] = fileData;
+		queueHead++;
+	}
 }
 
 std::string CommunicationNetwork::dequeue()
@@ -164,6 +176,7 @@ std::string CommunicationNetwork::dequeue()
 		queueHead--;
 		return tmp;	//tail is the first in, as i'm proverbially stacking them, so first out.
 	}
+	std::cout << "Queue is empty." << std::endl;
 	return arrayQueue[queueTail];
 }
 
@@ -191,24 +204,24 @@ bool CommunicationNetwork::checkbuild()
 	return false;
 }
 
-template<typename T>
-void CommunicationNetwork::transfer_msg(T msg)	//pushes a message through the nodes.
+
+void CommunicationNetwork::transfer_msg(std::string msg)	//pushes a message through the nodes.
 {
 		crawler = head;							//set to top of the chain
-		while (crawler/*->get_next()*/ != NULL)	//while it is not the last one
+		while (crawler != NULL)	//while it is not the last one
 		{
 			crawler->set_message(msg);			//commit word
 			std::cout << crawler->get_key() << " recieved " << crawler->get_message() << std::endl;	//print condition
 			crawler->set_message("");			//effectively NULLs the string after it has been printed
 			crawler = crawler->get_next();		//update condition
 		}
-		while (crawler/*->get_next()*/ != NULL)	//same loop in reverse
+		/*while (crawler != NULL)	//same loop in reverse
 		{
 			crawler->set_message(msg);			//commit word
 			std::cout << crawler->get_key() << " recieved " << crawler->get_message() << std::endl;	//print condition
 			crawler->set_message("");			//effectively NULLs the string
 			crawler = crawler->get_previous();	//update condition
-		}
+		}*/
 }
 
 template<typename T>
