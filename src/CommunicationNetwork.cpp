@@ -198,14 +198,14 @@ void CommunicationNetwork::transfer_msg(T msg)	//pushes a message through the no
 		while (crawler/*->get_next()*/ != NULL)	//while it is not the last one
 		{
 			crawler->set_message(msg);			//commit word
-			cout << crawler->get_key() << " recieved " << crawler->get_message() << endl;	//print condition
+			std::cout << crawler->get_key() << " recieved " << crawler->get_message() << std::endl;	//print condition
 			crawler->set_message("");			//effectively NULLs the string after it has been printed
 			crawler = crawler->get_next();		//update condition
 		}
 		while (crawler/*->get_next()*/ != NULL)	//same loop in reverse
 		{
 			crawler->set_message(msg);			//commit word
-			cout << crawler->get_key() << " recieved " << crawler->get_message() << endl;	//print condition
+			std::cout << crawler->get_key() << " recieved " << crawler->get_message() << std::endl;	//print condition
 			crawler->set_message("");			//effectively NULLs the string
 			crawler = crawler->get_previous();	//update condition
 		}
