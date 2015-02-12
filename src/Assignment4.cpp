@@ -30,10 +30,11 @@ int main()
 	string* fileData = new string[32];	//there are 32 words in this file. Theoreticall this should work. a simple string might be even better. meh.
 	if (infile.is_open())
 	{
-		string buffer;
-		while (getline(infile, buffer, ' '))
+		for (int i = 0; i < IFWORDS; i++)
 		{
-			fileData[fdcount] = buffer;
+			getline(infile, fileData[i], ' ');
+			if (infile.eof())
+				break;
 		}
 	}
 	else
@@ -45,20 +46,20 @@ int main()
 	}
 	infile.close();
 
-
 	unsigned int select = 0;
-	//cout list of options.
-	cout << "======Main Menu======" << endl
-		<< "1. Build Network" << endl
-		<< "2. Print Network Path" << endl
-		<< "3. Enqueue" << endl
-		<< "4. Dequeue" << endl
-		<< "5. Print Queue" << endl
-		<< "6. Send Entire Network" << endl
-		<< "7. Quit" << endl;
 
 	while (select != 7)
 	{
+		//cout list of options.
+		cout << "======Main Menu======" << endl
+			<< "1. Build Network" << endl
+			<< "2. Print Network Path" << endl
+			<< "3. Enqueue" << endl
+			<< "4. Dequeue" << endl
+			<< "5. Print Queue" << endl
+			<< "6. Send Entire Network" << endl
+			<< "7. Quit" << endl;
+
 		//switch
 		cin >> select;
 		switch (select)
@@ -75,20 +76,25 @@ int main()
 		case 3:	//enqueue
 			if (fdcount < IFWORDS)
 			{
-				net->enqueue(fileData[0]);
+				net->enqueue(fileData[fdcount]);
 				fdcount++;
+			}
+			else
+			{
+				cout << "No more words to queue." << endl;
 			}
 			break;
 		case 4:	//dequeue
 			if (net->checkbuild())	//this is the problem child
 			{
 				net->transfer_msg(net->dequeue());	//transmits the message given by dq'ing
+				//cout << net->dequeue() << endl;
 			}
 			else
 				cout << "Build a network before attempting to transmit a message." << endl;
 			break;
 		case 5:	//print queue
-			//net->print_path();
+			//for i < in_queue {cout dequeue()}
 			break;
 		case 6:	//send entire network
 			if (net->checkbuild())
@@ -100,7 +106,7 @@ int main()
 			cout << "Goodbye!" << endl;
 			break;
 		default:	//no match
-			cout << "\n That was not an option.";
+			cout << "\n That was not an option." << endl;
 		}
 	}
 
