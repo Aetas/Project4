@@ -10,10 +10,10 @@ public:
 	template<typename T>
 	beacon(T k, beacon* prev);		//builds with key and previous
 
-	std::string get_key();				//returns key (aka name here)
-	std::string get_message();			//return value
-	beacon* get_next();					//return next node
-	beacon* get_previous();				//return previous node
+	std::string get_key();			//returns key (aka name here)
+	std::string get_message();		//return value
+	beacon* get_next();				//return next node
+	beacon* get_previous();			//return previous node
 	void set_message(std::string);	//commits values
 	void set_key(std::string);		//commits key/name
 	void set_next(beacon*);			//commits next in chain
@@ -38,19 +38,22 @@ class CommunicationNetwork
 		void build_net();			//builds the network. hardcoded initial names
 		void print_path();			//prints whole chain with names
         bool queueIsFull();			//send when full
+		bool queueIsEmpty();
 		void transfer_msg(std::string);		//pushes a message through the nodes.
 		template<typename T>
 		beacon* find_city(T k);		//finds a city by name
 		void add_city();			//inserts city
 		void delete_city();			//calls the delete query
-		bool checkbuild();			//checks if the network has been built
-
+		bool buildIsGood();			//checks if the network has been built
+		int get_tail();
+		int get_head();
+		std::string peek(std::string);
 
     private:
 		bool ini;
         beacon* head;
         beacon* tail;
-		beacon* crawler;	//may not need
+		beacon* crawler;	//may not need. could have just made one every time i needed it
         int queueSize;
         int queueHead;
         int queueTail;
