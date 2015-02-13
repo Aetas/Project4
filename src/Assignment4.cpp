@@ -25,16 +25,16 @@ int main()
 {
 	CommunicationNetwork* net = new CommunicationNetwork(10);	//queue size of 10
 	std::ifstream infile;
-	unsigned int fdcount = 0;
+	unsigned int enq = 0;
 	infile.open("messageIn.txt");
-	string* fileData = new string[32];	//there are 32 words in this file. Theoreticall this should work. a simple string might be even better. meh.
+	string* fileData = new string[32];	//there are 32 words in this file. Theoreticall this should work.
 	if (infile.is_open())
 	{
-		for (int i = 0; i < IFWORDS; i++)
+		int i = 0;
+		while (!infile.eof() && i < IFWORDS)
 		{
-			getline(infile, fileData[i], ' ');
-			if (infile.eof())
-				break;
+			infile >> fileData[i];
+			i++;
 		}
 	}
 	else
@@ -51,13 +51,13 @@ int main()
 	while (select != 7)
 	{
 		//cout list of options.
-		cout << "======Main Menu======" << endl
+		cout << "======Main Menu=====" << endl
 			<< "1. Build Network" << endl
 			<< "2. Print Network Path" << endl
 			<< "3. Enqueue" << endl
 			<< "4. Dequeue" << endl
 			<< "5. Print Queue" << endl
-			<< "6. Send Entire Network" << endl
+			<< "6. Send Entire Message" << endl
 			<< "7. Quit" << endl;
 
 		//switch
@@ -68,16 +68,24 @@ int main()
 			net->build_net();
 			break;
 		case 2:	//print path
-			if(net->checkbuild())
+			if (net->buildIsGood())
 				net->print_path();
 			else
 				cout << "Build a network before attempting to print path." << endl;
 			break;
 		case 3:	//enqueue
-			if (fdcount < IFWORDS)
+			if (enq < IFWORDS)	//if there are words to enqueue
 			{
-				net->enqueue(fileData[fdcount]);
-				fdcount++;
+				if (!net->queueIsFull())	//check if queue is full
+				{
+					net->enqueue(fileData[enq]);	//enqueue
+					cout << "E: " << fileData[enq] << endl;
+					cout << "H: " << net->get_head() << endl;
+					cout << "T: " << net->get_tail() << endl;
+					enq++;
+				}
+				else
+					cout << "Queue is full." << endl;
 			}
 			else
 			{
@@ -85,33 +93,50 @@ int main()
 			}
 			break;
 		case 4:	//dequeue
-			if (net->checkbuild())	//this is the problem child
+			if (net->buildIsGood())
 			{
-				net->transfer_msg(net->dequeue());	//transmits the message given by dq'ing
-				//cout << net->dequeue() << endl;
+				if (!net->queueIsEmpty())	//if queue is not empty
+				{
+//					cout << "H: " << net->get_head()+1 << endl;
+//					cout << "T: " << net->get_tail() << endl;
+					net->transfer_msg(net->dequeue());	//transmits the message given by dq'ing
+				}
+				else
+					cout << "Queue is empty." << endl;
 			}
 			else
 				cout << "Build a network before attempting to transmit a message." << endl;
 			break;
 		case 5:	//print queue
-			//for i < in_queue {cout dequeue()}
+			if (!net->queueIsEmpty())
+				net->print_queue();		//works just dandy
+			else
+				cout << "Empty" << endl;
 			break;
 		case 6:	//send entire network
-			if (net->checkbuild())
-				net->print_path();
+			if (net->buildIsGood())
+			{
+				while (enq < IFWORDS)
+				{
+					while (!net->queueIsFull() && enq < IFWORDS)
+					{
+						net->enqueue(fileData[enq]);
+						enq++;
+					}
+					while (!net->queueIsEmpty())
+						net->transfer_msg(net->dequeue());
+				}
+			}
 			else
 				cout << "Build a network before attempting to transmit a message." << endl;
 			break;
 		case 7: //quit
 			cout << "Goodbye!" << endl;
 			break;
-		default:	//no match
+		default://no match
 			cout << "\n That was not an option." << endl;
 		}
 	}
-
-	cout << endl
-		<< endl;
-
+	delete net;
 	return 0;
 }

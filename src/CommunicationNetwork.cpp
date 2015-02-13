@@ -46,6 +46,11 @@ beacon* beacon::get_next()
 	return next;
 }
 
+beacon* beacon::get_previous()
+{
+	return previous;
+}
+
 void beacon::set_message(std::string arg)
 {
 	message = arg;
@@ -70,8 +75,8 @@ void beacon::set_next(beacon *nxt)
 //*************
 CommunicationNetwork::CommunicationNetwork(int qsize)
 {
-	crawler = NULL;
-	head = NULL;
+	crawler = nullptr;
+	head = nullptr;
 	queueSize = qsize;
 	arrayQueue = new/*("")*/ std::string[queueSize];	//might be better implimented in a queue function
 	for (int i = 0; i < queueSize; i++)	//initialize all to 'null' strings
@@ -87,7 +92,7 @@ CommunicationNetwork::~CommunicationNetwork()
 {
 	crawler = head;
 	beacon* hitman;
-	while (crawler != NULL)
+	while (crawler != nullptr)
 	{
 		hitman = crawler;
 		crawler = crawler->get_next();
@@ -99,7 +104,7 @@ CommunicationNetwork::~CommunicationNetwork()
 //builds the network
 void CommunicationNetwork::build_net()
 {
-	crawler = new beacon("Los Angeles", NULL);	//top of the list, no previous. thus NULL
+	crawler = new beacon("Los Angeles", nullptr);	//top of the list, no previous. thus NULL
 	head = crawler;
 	//crawler->set_key("Los Angeles");
 
@@ -146,82 +151,107 @@ void CommunicationNetwork::print_path()
 		crawler = crawler->get_next();
 	}
 	std::cout << "NULL";
-	std::cout << std::endl << "=================" << std::endl;
+	std::cout << std::endl << "==================" << std::endl;
 }
 
 //circular queue methods
 void CommunicationNetwork::enqueue(std::string fileData)
 {
-	if (queueIsFull())
-	{
-		std::cout << "Queue is full." << std::endl;
-	}
-	else
-	{
-		arrayQueue[queueHead] = fileData;
-		queueHead++;
-	}
+	arrayQueue[queueTail] = fileData;
+	queueTail++;
+	if (queueTail == queueSize)	//it will equal 10 and not 9 because of the incriment after adding to 9
+		queueTail = 0;
 }
 
 std::string CommunicationNetwork::dequeue()
 {
-	if (arrayQueue[queueTail] != "")
-	{	
-		std::string tmp = arrayQueue[queueTail];	//must have a temporary to delete before exit
-		for (int i = queueTail; i < queueHead; i++)	//shifts the array down onto tail so it does not overflow
-		{
-			std::string shifty = arrayQueue[i + 1];
-			arrayQueue[i] = shifty;
-		}
-		queueHead--;
-		return tmp;	//tail is the first in, as i'm proverbially stacking them, so first out.
-	}
-	std::cout << "Queue is empty." << std::endl;
-	return arrayQueue[queueTail];
+	std::string temp = arrayQueue[queueHead];
+	arrayQueue[queueHead] = "";
+	queueHead++;
+	if (queueHead == queueSize)	//restart the loop and catch tail
+		queueHead = 0;
+	return temp;
 }
 
 void CommunicationNetwork::print_queue()
 {
-	for (int i = 0; i < queueSize; i++)
+	if (queueIsEmpty())
+		std::cout << "Empty" << std::endl;
+	int i = queueHead;		//preserve queuehead since this is not a dequeue, just a print
+	while (i != queueTail)
 	{
-		std::cout << i + 1 << ": " << arrayQueue[i];
-		//if(arrayQueue != "") {...};
+		std::cout << i << ": " << arrayQueue[i] << std::endl;
+		if (i == queueSize)
+			i = 0;
+		else
+			i++;
 	}
 }
 
 bool CommunicationNetwork::queueIsFull()
 {
-	if (queueHead == queueSize)
+	if ((queueHead == 0 && queueTail == 9) || (queueHead - 1 == queueTail))	//
+		return true;
+	return false;
+}
+bool CommunicationNetwork::queueIsEmpty()
+{
+	if (queueHead == queueTail)
 		return true;
 	return false;
 }
 
 //checks if built
-bool CommunicationNetwork::checkbuild()
+bool CommunicationNetwork::buildIsGood()
 {
-	if (ini)	//ini is only true if net_build() has run
-		return true;
-	return false;
+	return ini;
 }
 
 
 void CommunicationNetwork::transfer_msg(std::string msg)	//pushes a message through the nodes.
 {
-		crawler = head;							//set to top of the chain
-		while (crawler != NULL)	//while it is not the last one
-		{
-			crawler->set_message(msg);			//commit word
-			std::cout << crawler->get_key() << " recieved " << crawler->get_message() << std::endl;	//print condition
-			crawler->set_message("");			//effectively NULLs the string after it has been printed
-			crawler = crawler->get_next();		//update condition
-		}
-		/*while (crawler != NULL)	//same loop in reverse
-		{
-			crawler->set_message(msg);			//commit word
-			std::cout << crawler->get_key() << " recieved " << crawler->get_message() << std::endl;	//print condition
-			crawler->set_message("");			//effectively NULLs the string
-			crawler = crawler->get_previous();	//update condition
-		}*/
+	std::cout << "H: " << queueHead << std::endl;
+	std::cout << "T: " << queueTail << std::endl;
+	beacon* temp = nullptr;
+	crawler = head;							//set to top of the chain
+	while (crawler != nullptr)	//while it is not the last one
+	{
+		crawler->set_message(msg);			//commit word
+		std::cout << crawler->get_key() << " received " << crawler->get_message() << std::endl;	//print condition
+		crawler->set_message("");			//effectively NULLs the string after it has been printed
+		temp = crawler;
+		crawler = crawler->get_next();		//update condition
+	}
+	crawler = temp->get_previous();	//sets to the 'last' non-null node
+	while (crawler != nullptr)	//same loop in reverse
+	{
+		crawler->set_message(msg);			//commit word
+		std::cout << crawler->get_key() << " received " << crawler->get_message() << std::endl;	//print condition
+		crawler->set_message("");			//effectively NULLs the string
+		crawler = crawler->get_previous();	//update condition
+	}
+}
+
+int CommunicationNetwork::get_head()
+{
+	return queueHead;
+}
+
+int CommunicationNetwork::get_tail()
+{
+	return queueTail;
+}
+
+
+std::string CommunicationNetwork::peek(std::string location)
+{
+	if (location == "head")
+		return arrayQueue[queueHead];
+	else if (location == "tail")
+		return arrayQueue[queueTail];
+	else
+		return "";
+
 }
 
 template<typename T>
@@ -250,6 +280,9 @@ void CommunicationNetwork::add_city()	//update to a double linked
 	beacon* temp = new beacon(ncity);	//creates new node with specified name
 	temp->set_next(crawler->get_next());//sets it's link to the original next
 	crawler->set_next(temp);			//sets the previous node to the new one in the chain
+	/*
+	 * make a case for adding to the beginning of the network, as in if prev is 'first', then create new and reassign head
+	*/
 }
 
 void CommunicationNetwork::delete_city()	//update to a double linked
